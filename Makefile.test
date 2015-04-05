@@ -1,0 +1,21 @@
+SOURCES := test_table.cpp table.cpp \
+	test_field.cpp field.cpp \
+# Objs are all the sources, with .cpp replaced by .o
+OBJS := $(SOURCES:.cpp=.o)
+
+#CC := g++ 
+CC := clang++
+CFLAGS := -std=c++11
+#LIBS := -lpthread
+LIBS := -lboost_unit_test_framework  
+
+all: test
+
+# Compile the binary 't' by calling the compiler with cflags, lflags, and any libs (if defined) and the list of objects.
+test: $(OBJS)
+	$(CC) $(CFLAGS) -o test $(OBJS) $(LFLAGS) $(LIBS)
+
+# Get a .o from a .cpp by calling compiler with cflags and includes (if defined)
+.cpp.o:
+	$(CC) $(CFLAGS) $(INCLUDES) -c $<
+
