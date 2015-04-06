@@ -1,7 +1,11 @@
 #include "page.h"
 #include "io.h"
 
-page_t::page_t() : prev(-1), header_end(-1), row_begin(-1)
+const page_t::len_t page_t::len = 8 * 1024;
+
+page_t::page_t() : prev(-1)
+    , header_end(sizeof(prev) + sizeof(header_end) + sizeof(row_begin) + 1)
+    , row_begin(len)
 {
 } 
 

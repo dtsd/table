@@ -13,7 +13,7 @@ public:
         len_t offset, len;
     };
 
-    static const len_t len = 8 * 1024;
+    static const len_t len ;
 
     friend std::ostream& operator<<(std::ostream &, const page_t &t);
     friend std::istream& operator>>(std::istream &, page_t &t);

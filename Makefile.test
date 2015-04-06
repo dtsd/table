@@ -1,4 +1,4 @@
-SOURCES := test_table.cpp table.cpp \
+SOURCES := test.cpp table.cpp \
 	row.cpp page.cpp
 # Objs are all the sources, with .cpp replaced by .o
 OBJS := $(SOURCES:.cpp=.o)
