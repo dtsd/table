@@ -1,5 +1,5 @@
 SOURCES := test_table.cpp table.cpp \
-	test_field.cpp field.cpp \
+	row.cpp page.cpp
 # Objs are all the sources, with .cpp replaced by .o
 OBJS := $(SOURCES:.cpp=.o)
 
@@ -7,7 +7,7 @@ OBJS := $(SOURCES:.cpp=.o)
 CC := clang++
 CFLAGS := -std=c++11
 #LIBS := -lpthread
-LIBS := -lboost_unit_test_framework  
+LIBS := -lboost_unit_test_framework -lboost_filesystem -lboost_system
 
 all: test
 

@@ -1,15 +1,18 @@
 #ifndef IO_6442
 #define IO_6442
 
-#include <iostream>
-#include <type_traits>
-#include <iterator>
+#include "common.h"
+
+namespace io {
+
+enum hint_t : uint8_t { literal = 0, integral, toast };
+typedef std::vector<hint_t> hint_list_t;
+
+typedef uint64_t len_t;
+
 
 template<typename T>
 void loads(std::istream &is, T &t);
-
-template<typename T>
-void dumps(std::ostream &os, const T &t);
 
 template<typename T>
 void loads(std::istream &is, T &t, std::true_type)
@@ -23,16 +26,19 @@ void loads(std::istream &is, T &t, std::false_type)
     auto size = t.size();
     loads(is, size);
     t.resize(size);
-    for(auto const &item : t) {
+    for(auto &item : t) {
         loads(is, item);
     }
 }
 
 template<typename T>
-void loads(std::istream is, T &t)
+void loads(std::istream &is, T &t)
 {
-    loads(is, t, std::integral_constant<bool, std::is_pod<T>::value());
+    loads(is, t, std::integral_constant<bool, std::is_pod<T>::value>() );
 }
+
+template<typename T>
+void dumps(std::ostream &os, const T &t);
 
 template<typename T>
 void dumps(std::ostream &os, const T &t, std::true_type)
@@ -51,9 +57,11 @@ void dumps(std::ostream &os, const T &t, std::false_type)
 }
 
 template<typename T>
-void dumps(std::ostream os, const T &t)
+void dumps(std::ostream &os, const T &t)
 {
-    dumps(os, t, std::integral_constant<bool, std::is_pod<T>::value());
+    dumps(os, t, std::integral_constant<bool, std::is_pod<T>::value>());
+}
+
 }
 
 

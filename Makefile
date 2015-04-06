@@ -1,10 +1,10 @@
 #SOURCES := main.cpp table.cpp field.cpp
-SOURCES := main.cpp table.cpp 
+SOURCES := main.cpp table.cpp page.cpp row.cpp
 # Objs are all the sources, with .cpp replaced by .o
 OBJS := $(SOURCES:.cpp=.o)
 
-#CC := g++ 
-CC := clang++
+CC := g++ 
+#CC := clang++
 CFLAGS := -std=c++11
 #LIBS := -lpthread
 LIBS := 
