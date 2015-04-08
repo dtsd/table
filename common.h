@@ -14,10 +14,12 @@
 #include <vector>
 #include <string>
 #include <set>
+#include <tuple>
 
 #include <memory>
 
 typedef uint32_t field_index_t;
+typedef std::tuple<size_t, size_t> addr_t;
 
 
 #endif /* end of include guard: COMMON_17696 */

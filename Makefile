@@ -1,5 +1,6 @@
 #SOURCES := main.cpp table.cpp field.cpp
-SOURCES := main.cpp table.cpp page.cpp row.cpp
+SOURCES := main.cpp table.cpp page.cpp row.cpp \
+	index.cpp table_iter.cpp
 # Objs are all the sources, with .cpp replaced by .o
 OBJS := $(SOURCES:.cpp=.o)
 

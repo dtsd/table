@@ -4,9 +4,10 @@
 const page_t::len_t page_t::len = 8 * 1024;
 
 page_t::page_t() : prev(-1)
-    , header_end(sizeof(prev) + sizeof(header_end) + sizeof(row_begin) + 1)
+    , header_end(sizeof(prev) + sizeof(header_end) + sizeof(row_begin))
     , row_begin(len)
 {
+    //std::cerr << "header_end is " << header_end << std::endl;
 } 
 
 page_t::~page_t()
@@ -25,14 +26,20 @@ std::ostream& operator<<(std::ostream &os, const page_t &p)
     for(auto i : p.dirty_header_set) {
         assert(i < p.header_list.size());
 
-        os.seekp(offset + p.header_end 
-                - (p.header_list.size() - i) * sizeof(page_t::header_t));
+        io::len_t header_offset = offset 
+            + p.header_end 
+            - (p.header_list.size() - i) * sizeof(page_t::header_t)
+        ;
+        os.seekp(header_offset);
+        //std::cerr << "writing header at " << os.tellp() << std::endl;
         io::dumps(os, p.header_list[i]);
     }
 
     os.seekp(offset + p.row_begin);
     for(int i = p.dirty_row_list_reversed.size() - 1; i >= 0; --i) {
-        os << p.dirty_row_list_reversed[i];
+        const std::string &s = p.dirty_row_list_reversed[i];
+        //std::cerr << "writing row at " << os.tellp() << " with " << s.size() << std::endl;
+        os.write(s.c_str(), s.size());
     }
     return os;
 }
@@ -46,7 +53,8 @@ std::istream& operator>>(std::istream &is, page_t &p)
     io::loads(is, p.row_begin);
 
     page_t::header_t header;
-    while(is.tellg() < offset + p.header_end) {
+    while(is.tellg() < offset + p.header_end - 1) {
+        //std::cerr << "reading header at " << is.tellg() << std::endl;
         io::loads(is, header);
         p.header_list.push_back(header);
     }

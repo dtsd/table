@@ -5,10 +5,27 @@
 
 namespace io {
 
-enum hint_t : uint8_t { literal = 0, integral, toast };
+enum hint_t : uint8_t { str = 0, int_, toast, size };
 typedef std::vector<hint_t> hint_list_t;
 
 typedef uint64_t len_t;
+
+typedef std::shared_ptr<std::fstream> stream_ptr;
+
+inline
+stream_ptr create_stream(const std::string &fn, bool trunc = false)
+{
+    stream_ptr f = std::make_shared<std::fstream>();
+    std::ios::openmode m = std::ios::in 
+            | std::ios::out 
+            | std::ios::binary
+    ;
+    if(trunc) {
+        m |= std::ios::trunc;
+    }
+    f->open(fn, m);
+    return f;
+}
 
 
 template<typename T>

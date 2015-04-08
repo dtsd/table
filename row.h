@@ -16,9 +16,11 @@ public:
 
     std::string get_value(field_index_t) const;
     void set_value(field_index_t, const std::string &);
+
+    bool empty() const { return value_list.empty(); };
 private:
     /* data */
-    const io::hint_list_t &hint_list;
+    io::hint_list_t hint_list;
     std::vector<std::string> value_list;
 };
 
