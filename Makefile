@@ -6,7 +6,7 @@ OBJS := $(SOURCES:.cpp=.o)
 
 CC := g++ 
 #CC := clang++
-CFLAGS := -std=c++11
+CFLAGS := -std=c++11 -g
 #LIBS := -lpthread
 LIBS := 
 

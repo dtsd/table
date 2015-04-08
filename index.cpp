@@ -60,7 +60,7 @@ row_ptr index_t::make_row()
     return std::make_shared<row_t>(hint_list);
 }
 
-void index_t::del(const std::string &value, page_t::index_t pi, row_t::index_t ri)
+void index_t::del(const std::string &value, page_index_t pi, row_index_t ri)
 {
     size_t i = get_bucket_index(value);
     size_t 
@@ -115,7 +115,7 @@ void index_t::del(const std::string &value, page_t::index_t pi, row_t::index_t r
     }
 }
 
-void index_t::put(const std::string &value, page_t::index_t pi, row_t::index_t ri)
+void index_t::put(const std::string &value, page_index_t pi, row_index_t ri)
 {
     size_t i = get_bucket_index(value);
     size_t offset = bucket_begin + i * sizeof(bucket_t);
@@ -198,8 +198,8 @@ std::vector<addr_t> index_t::get(const std::string &value)
             if(row->get_value(field_t::value) == value) {
                 list.push_back(
                     std::make_tuple(
-                        page_t::index_t(std::stoul(row->get_value(field_t::page)))
-                        ,row_t::index_t(std::stoul(row->get_value(field_t::row)))
+                        page_index_t(std::stoul(row->get_value(field_t::page)))
+                        ,row_index_t(std::stoul(row->get_value(field_t::row)))
                     )
                 );
             }

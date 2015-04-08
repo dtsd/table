@@ -6,8 +6,6 @@
 
 class row_t {
 public:
-    typedef uint16_t index_t;
-
     friend std::ostream& operator<<(std::ostream &, const row_t &t);
     friend std::istream& operator>>(std::istream &, row_t &t);
 

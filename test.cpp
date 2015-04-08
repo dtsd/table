@@ -6,6 +6,7 @@
 #include "row.h"
 #include "io.h"
 #include "index.h"
+#include "table_iter.h"
 
 BOOST_AUTO_TEST_CASE(Table_serialization)
 {
@@ -25,14 +26,14 @@ BOOST_AUTO_TEST_CASE(Table_serialization)
     };
 
     table_t t1("test.tab", hl), t2("test.tab", io::hint_list_t());
-    t1.last_page = 123;
-    t1.last_free_page = 496;
+    t1.last_page_index = 123;
+    t1.last_free_page_index = 496;
 
     ss << t1;
     ss >> t2;
 
-    BOOST_CHECK_EQUAL( t2.last_page , 123 );
-    BOOST_CHECK_EQUAL( t2.last_free_page , 496 );
+    BOOST_CHECK_EQUAL( t2.last_page_index , 123 );
+    BOOST_CHECK_EQUAL( t2.last_free_page_index , 496 );
 
     BOOST_CHECK_EQUAL( t1.get_hint_list().size() , 10);
     BOOST_CHECK_EQUAL( t2.get_hint_list().size() , 10);
@@ -46,6 +47,7 @@ BOOST_AUTO_TEST_CASE(Table_serialization)
 BOOST_AUTO_TEST_CASE(Table_file)
 {
     std::string fn = "fileTest.tab";
+    /*
     {
         std::fstream f;
         f.open(fn
@@ -69,8 +71,9 @@ BOOST_AUTO_TEST_CASE(Table_file)
     }
     
     BOOST_CHECK_EQUAL(offset + fn.size(), boost::filesystem::file_size(fn));
+    */
 
-    std::string s1 = "gavno", s2 = "МЁД";
+    std::string s1 = "abc", s2 = "CDE";
     std::string s3, s4;
     {
         std::fstream f;
@@ -98,8 +101,183 @@ BOOST_AUTO_TEST_CASE(Table_file)
     BOOST_CHECK_EQUAL(s1, s3);
     BOOST_CHECK_EQUAL(s2, s4);
 
-    BOOST_CHECK_EQUAL("gavno", s3);
-    BOOST_CHECK_EQUAL("МЁД", s4);
+    BOOST_CHECK_EQUAL("abc", s3);
+    BOOST_CHECK_EQUAL("CDE", s4);
+}
+
+/*
+BOOST_AUTO_TEST_CASE(Table_iter)
+{
+    size_t size = 10000;
+    std::string fn = "Table_iter.tab";
+    io::hint_list_t hl = { io::hint_t::int_, io::hint_t::str };
+    table_t t(fn, hl);
+
+    auto it = t.begin();
+
+    for(int i = 0; i < size; ++i) {
+        auto row = t.make_row();
+        row->set_value(0, std::to_string(i));
+        row->set_value(1, std::to_string(i * 3));
+        it.insert(row);
+    }
+
+    int i;
+    for(i = 0, it = t.begin(); it != t.end(); ++it, ++i) {
+        row_ptr row = *it;
+        if(row) {
+            std::cout << "row " << i 
+                << " is [" 
+                << (*it)->get_value(0)
+                << ","
+                << (*it)->get_value(1)
+                << "]" 
+                << std::endl;
+        } else {
+            std::cout << "empty row" << std::endl;
+        }
+    }
+
+    BOOST_CHECK_EQUAL(i, size);
+}
+*/
+
+BOOST_AUTO_TEST_CASE(Table_insertDumpAndLoad)
+{
+    size_t size = 100 
+        //* 1000
+    ;
+    std::string fn = "Table_iter.tab";
+    io::hint_list_t hl = { io::hint_t::int_, io::hint_t::str };
+
+    {
+        table_t t(fn, hl);
+
+        auto it = t.begin();
+
+        for(int i = 0; i < size; ++i) {
+
+            if(i && !(i % 1000)) {
+                std::cout << i << " rows inserted" << std::endl;
+            }
+
+            auto row = t.make_row();
+            row->set_value(0, std::to_string(i));
+            row->set_value(1, std::to_string(i * i));
+            it.insert(row);
+
+        }
+
+    }
+
+    {
+        table_t t(fn);
+        int i;
+        table_iter_t it;
+        for(i = 0, it = t.begin(); it != t.end(); ++it, ++i) {
+            row_ptr row = *it;
+            /*
+            if(row) {
+                std::cout << "row " << i 
+                    << " is [" 
+                    << (*it)->get_value(0)
+                    << ","
+                    << (*it)->get_value(1)
+                    << "]" 
+                    << std::endl;
+            } else {
+                std::cout << "empty row" << std::endl;
+            }
+            */
+        }
+
+        BOOST_CHECK_EQUAL(i, size);
+    }
+}
+
+BOOST_AUTO_TEST_CASE(Table_insertAndDelete)
+{
+    size_t size = 3;
+    std::string fn = "Table_iter.tab";
+    io::hint_list_t hl = { io::hint_t::int_, io::hint_t::str };
+
+    {
+        table_t t(fn, hl);
+
+        auto it = t.begin();
+
+        for(int i = 0; i < size; ++i) {
+
+            if(i && !(i % 1000)) {
+                std::cout << i << " rows inserted" << std::endl;
+            }
+
+            auto row = t.make_row();
+            row->set_value(0, std::to_string(i));
+            row->set_value(1, std::to_string(i * i));
+            it.insert(row);
+
+        }
+
+    }
+
+    {
+        table_t t(fn);
+        auto it = t.begin();
+        int i = 0;
+        while(it != t.end()) {
+            it.delete_();
+            i++;
+        }
+        BOOST_CHECK_EQUAL(i, size);
+    }
+}
+
+BOOST_AUTO_TEST_CASE(Table_insertAndUpdate)
+{
+    std::string fn = "Table_iter.tab";
+    io::hint_list_t hl = { io::hint_t::int_, io::hint_t::str };
+
+    {
+        table_t t(fn, hl);
+        auto it = t.begin();
+        auto row = t.make_row();
+        row->set_value(0, std::to_string(123));
+        row->set_value(1, "abc");
+        it.insert(row);
+    }
+
+    {
+        table_t t(fn);
+        auto it = t.begin();
+
+        BOOST_CHECK(it != t.end());
+        BOOST_CHECK(*it);
+
+        row_ptr row = *it;
+        row->set_value(1, "ABCDEFGH");
+        it.update(row);
+    }
+
+    {
+        table_t t(fn);
+        auto it = t.begin();
+
+        BOOST_CHECK(it != t.end());
+        BOOST_CHECK(*it);
+
+        row_ptr row = *it;
+        BOOST_CHECK_EQUAL(row->get_value(0), std::to_string(123));
+        BOOST_CHECK_EQUAL(row->get_value(1), "ABCDEFGH");
+    }
+
+    {
+        table_t t(fn);
+        auto it = t.begin();
+        int i;
+        for(i = 0; it != t.end(); ++it, ++i) {}
+        BOOST_CHECK_EQUAL(i, 1);
+    }
 }
 
 BOOST_AUTO_TEST_CASE(Page_serialization)

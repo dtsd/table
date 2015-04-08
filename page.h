@@ -6,14 +6,12 @@
 
 class page_t {
 public:
-    typedef uint16_t index_t;
-    typedef uint16_t len_t;
 
     struct header_t {
-        len_t offset, len;
+        page_len_t offset, len;
     };
 
-    static const len_t len ;
+    static const page_len_t len ;
 
     friend std::ostream& operator<<(std::ostream &, const page_t &t);
     friend std::istream& operator>>(std::istream &, page_t &t);
@@ -22,17 +20,17 @@ public:
     virtual ~page_t ();
 
     bool append(const row_t &);
-    void mark_free(row_t::index_t);
+    void mark_free(row_index_t);
 
-    //row_ptr load_row(row_t::index_t);
+    //row_ptr load_row(row_index_t);
 private:
     /* data */
 
-    std::set<row_t::index_t> dirty_header_set;
+    std::set<row_index_t> dirty_header_set;
     std::vector<std::string> dirty_row_list_reversed;
 public:
-    index_t prev;
-    len_t header_end, row_begin;
+    page_index_t prev, index;
+    page_len_t header_end, row_begin;
     std::vector<header_t> header_list;
 };
 

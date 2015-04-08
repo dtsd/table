@@ -1,9 +1,9 @@
 #include "page.h"
 #include "io.h"
 
-const page_t::len_t page_t::len = 8 * 1024;
+const page_len_t page_t::len = 8 * 1024;
 
-page_t::page_t() : prev(-1)
+page_t::page_t() : prev(-1), index(-1)
     , header_end(sizeof(prev) + sizeof(header_end) + sizeof(row_begin))
     , row_begin(len)
 {
@@ -78,7 +78,7 @@ bool page_t::append(const row_t &row)
     header.offset = row_begin;
     header_end += sizeof(header_t);
 
-    row_t::index_t i = header_list.size();
+    row_index_t i = header_list.size();
     dirty_header_set.insert(i);
     header_list.push_back(header);
     dirty_row_list_reversed.push_back(s);
@@ -86,7 +86,7 @@ bool page_t::append(const row_t &row)
     return true;
 }
 
-void page_t::mark_free(row_t::index_t i)
+void page_t::mark_free(row_index_t i)
 {
     assert(header_list.size() > i);
     header_list[i].len = 0;
@@ -94,7 +94,7 @@ void page_t::mark_free(row_t::index_t i)
 }
 
 /*
-row_ptr page_t::load_row(row_t::index_t i)
+row_ptr page_t::load_row(row_index_t i)
 {
     row_ptr r;
     return r;

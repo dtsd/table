@@ -2,13 +2,14 @@ SOURCES := test.cpp \
 	table.cpp \
 	row.cpp \
 	page.cpp \
-	index.cpp
+	index.cpp \
+	table_iter.cpp
 # Objs are all the sources, with .cpp replaced by .o
 OBJS := $(SOURCES:.cpp=.o)
 
-#CC := g++ 
-CC := clang++
-CFLAGS := -std=c++11
+CC := g++ 
+#CC := clang++
+CFLAGS := -std=c++11 -g
 #LIBS := -lpthread
 LIBS := -lboost_unit_test_framework -lboost_filesystem -lboost_system
 

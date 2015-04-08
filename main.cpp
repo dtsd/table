@@ -4,14 +4,27 @@
 
 int main(int argc, const char *argv[])
 {
-    table_t t("test.tab", io::hint_list_t());
+    std::string fn = "Table_iter.tab";
+    io::hint_list_t hl = { io::hint_t::int_, io::hint_t::str };
 
-    index_t index("Index_putGet.idx", 1000, io::hint_t::int_);
-    index.init();
-
-    for(int i = 0; i < 1; ++i) {
-        index.put(std::to_string(i), i * 2, i * 3);
+    {
+        table_t t(fn, hl);
+        auto it = t.begin();
+        auto row = t.make_row();
+        row->set_value(0, std::to_string(123));
+        row->set_value(1, "abc");
+        it.insert(row);
     }
 
-    return 0;
+    {
+        table_t t(fn);
+        auto it = t.begin();
+
+        assert(it != t.end());
+        assert(*it);
+
+        row_ptr row = *it;
+        row->set_value(1, "ABCDEFGH");
+        it.update(row);
+    }
 }

@@ -21,9 +21,9 @@ public:
     friend std::ostream& operator<<(std::ostream &, const index_t &t);
     friend std::istream& operator>>(std::istream &, index_t &t);
 
-    void put(const std::string &, page_t::index_t, row_t::index_t);
+    void put(const std::string &, page_index_t, row_index_t);
     std::vector<addr_t> get(const std::string &s);
-    void del(const std::string &, page_t::index_t, row_t::index_t);
+    void del(const std::string &, page_index_t, row_index_t);
 
     size_t get_bucket_index(const std::string &);
     row_ptr make_row();
@@ -43,7 +43,6 @@ private:
     io::hint_list_t hint_list;
 };
 
-typedef std::shared_ptr<index_t> index_ptr;
 
 std::ostream& operator<<(std::ostream &, const index_t &t);
 std::istream& operator>>(std::istream &, index_t &t);

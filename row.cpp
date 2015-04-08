@@ -76,6 +76,8 @@ std::string row_t::get_value(field_index_t i) const
 void row_t::set_value(field_index_t i, const std::string &s)
 {
     assert(i < hint_list.size());
-    value_list.resize(i + 1);
+    if(i >= value_list.size()) {
+        value_list.resize(i + 1);
+    }
     value_list[i] = s;
 }

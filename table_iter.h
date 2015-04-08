@@ -7,7 +7,8 @@
 
 class table_t;
 
-typedef std::shared_ptr<table_t> table_ptr;
+//typedef std::shared_ptr<table_t> table_ptr;
+typedef table_t* table_ptr;
 
 class table_iter_t {
 public:
@@ -22,11 +23,20 @@ public:
     row_ptr operator*();
     bool operator==(const table_iter_t &);
     bool operator!=(const table_iter_t &);
+
+
+    void insert(row_ptr);
+    void update(row_ptr);
+    void delete_();
 private:
     /* data */
+    bool ensure_page_and_row();
 
     table_ptr table;
     addr_t addr;
+
+    page_ptr page;
+    row_ptr row;
 };
 
 #endif /* end of include guard: TABLE_ITER_24948 */
