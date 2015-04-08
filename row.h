@@ -15,7 +15,7 @@ public:
     std::string get_value(field_index_t) const;
     void set_value(field_index_t, const std::string &);
 
-    bool empty() const { return value_list.empty(); };
+    field_index_t size() const { return value_list.size(); };
 private:
     /* data */
     io::hint_list_t hint_list;

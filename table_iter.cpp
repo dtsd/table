@@ -1,5 +1,6 @@
 #include "table_iter.h"
 #include "table.h"
+#include "index.h"
 
 table_iter_t::table_iter_t()
     :addr(table_t::miss)
@@ -98,6 +99,19 @@ void table_iter_t::insert(row_ptr r)
         page = table->create_page();
         //std::get<0>(addr) = page->index;
     }
+    {
+        index_ptr index;
+        for(field_index_t i = 0; i < r->size(); ++i) {
+            if(index = table->get_index(i)) {
+                index->put(
+                    r->get_value(i)
+                    ,page->index
+                    ,page->header_list.size() - 1
+                );
+            }
+        }
+    }
+
     table->save_page(page);
 }
 
@@ -106,6 +120,20 @@ void table_iter_t::update(row_ptr r)
     if(!ensure_page_and_row()) {
         return;
     }
+
+    {
+        index_ptr index;
+        for(field_index_t i = 0; i < row->size(); ++i) {
+            if(index = table->get_index(i)) {
+                index->del(
+                    row->get_value(i)
+                    ,std::get<0>(addr)
+                    ,std::get<1>(addr)
+                );
+            }
+        }
+    }
+
     page->mark_free(std::get<1>(addr));
     insert(r);
     ensure_page_and_row();
@@ -115,6 +143,19 @@ void table_iter_t::delete_()
 {
     if(!ensure_page_and_row()) {
         return;
+    }
+
+    {
+        index_ptr index;
+        for(field_index_t i = 0; i < row->size(); ++i) {
+            if(index = table->get_index(i)) {
+                index->del(
+                    row->get_value(i)
+                    ,std::get<0>(addr)
+                    ,std::get<1>(addr)
+                );
+            }
+        }
     }
 
     page->mark_free(std::get<1>(addr));

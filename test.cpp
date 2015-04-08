@@ -422,6 +422,79 @@ BOOST_AUTO_TEST_CASE(Index_putGet)
     ;
 }
 
+BOOST_AUTO_TEST_CASE(Index_andTable)
+{
+    std::string fn = "Index_andTable.tab";
+    io::hint_list_t hl = { io::hint_t::int_, io::hint_t::str };
+    {
+        table_t t(fn, hl);
+        t.create_index(0, 1000);
+        t.create_index(1, 2000);
+    }
+    {
+        table_t t(fn);
+        BOOST_CHECK_EQUAL(t.get_index_count(), 2);
+        BOOST_CHECK_EQUAL(t.get_index(0)->get_len(), 1000);
+        BOOST_CHECK_EQUAL(t.get_index(1)->get_len(), 2000);
+    }
+}
+
+BOOST_AUTO_TEST_CASE(Index_find)
+{
+    size_t size = 100 
+        * 1000
+    ;
+
+    std::string fn = "Index_find.tab";
+    io::hint_list_t hl = { io::hint_t::int_, io::hint_t::str };
+
+    {
+        table_t t(fn, hl);
+        t.create_index(0, size * 3 / 2);
+        t.create_index(1, size * 3 / 2);
+
+        auto it = t.begin();
+
+        for(int i = 0; i < size; ++i) {
+
+            if(i && !(i % 1000)) {
+                std::cout << i << " rows inserted" << std::endl;
+            }
+
+            auto row = t.make_row();
+            row->set_value(0, std::to_string(i));
+            row->set_value(1, std::to_string(i * i));
+            it.insert(row);
+        }
+
+    }
+
+    {
+        table_t t(fn);
+
+        for(int i = 0; i < size; ++i) {
+            if(i && !(i % 1000)) {
+                std::cout << i * 2 << " index lookups" << std::endl;
+            }
+
+            auto it = t.find(0, std::to_string(i));
+            BOOST_CHECK(it != t.end());
+            BOOST_CHECK(*it);
+            row_ptr row = *it;
+            BOOST_CHECK_EQUAL(row->get_value(0), std::to_string(i));
+            BOOST_CHECK_EQUAL(row->get_value(1), std::to_string(i * i));
+
+            it = t.find(1, std::to_string(i * i));
+            BOOST_CHECK(it != t.end());
+            BOOST_CHECK(*it);
+            row = *it;
+            BOOST_CHECK_EQUAL(row->get_value(0), std::to_string(i));
+            BOOST_CHECK_EQUAL(row->get_value(1), std::to_string(i * i));
+        }
+    }
+
+}
+
 BOOST_AUTO_TEST_CASE(Index_miss) 
 {
     std::string 

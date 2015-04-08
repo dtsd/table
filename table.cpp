@@ -46,6 +46,7 @@ std::ostream& operator<<(std::ostream &os, const table_t &t)
     io::dumps(os, t.last_free_page_index);
     io::dumps(os, t.max_page_index);
     io::dumps(os, t.hint_list);
+    io::dumps(os, t.index_file_name_list);
     return os;
 }
 
@@ -55,6 +56,8 @@ std::istream& operator>>(std::istream &is, table_t &t)
     io::loads(is, t.last_free_page_index);
     io::loads(is, t.max_page_index);
     io::loads(is, t.hint_list);
+    io::loads(is, t.index_file_name_list);
+    t.load_index_list();
     return is;
 }
 
@@ -120,9 +123,28 @@ table_iter_t table_t::end()
     return table_iter_t(table_ptr(this), miss);
 }
 
-table_iter_t table_t::find(field_index_t, const std::string &)
+table_iter_t table_t::find(field_index_t i, const std::string &s)
 {
-    return table_iter_t(table_ptr(this), miss);
+    index_ptr index = get_index(i);
+    if(index) {
+        auto l = index->get(s);
+        if(l.empty()) {
+
+        } else {
+            return table_iter_t(
+                table_ptr(this)
+                , l[0]
+            );
+        }
+    } else {
+        for(auto it = begin(); it != end(); ++it) {
+            row_ptr row = *it;
+            if(row->get_value(i) == s) {
+                return it;
+            }
+        }
+    }
+    return end();
 }
 
 void table_t::create_index(field_index_t i, size_t size)
@@ -132,11 +154,48 @@ void table_t::create_index(field_index_t i, size_t size)
         index_list.resize(i + 1);
     }
 
+    index_file_name_list.resize(index_list.size());
 
     std::stringstream ss;
-    ss << file_name << i << ".idx";
+    ss << file_name << "." << i << ".idx";
 
-    index_list[i] = std::make_shared<index_t>(ss.str(), size, hint_list[i]);
+    index_file_name_list[i] = ss.str();
+
+    index_list[i] = std::make_shared<index_t>(
+            index_file_name_list[i]
+            , size
+            , hint_list[i]
+        );
     index_list[i]->init();
 
+}
+
+void table_t::load_index_list()
+{
+    assert(index_file_name_list.size() <= hint_list.size());
+
+    index_list.resize(index_file_name_list.size());
+    for(field_index_t i = 0; i < index_file_name_list.size(); ++i) {
+        std::string file_name = index_file_name_list[i];
+
+        if(file_name.empty()) {
+            continue;
+        }
+
+        index_ptr index = std::make_shared<index_t>(
+            file_name 
+            , 0
+            , hint_list[i]
+        );
+        index->loads();
+        index_list[i] = index;
+    }
+}
+
+index_ptr table_t::get_index(field_index_t i) const
+{
+    if(i < index_list.size()) {
+        return index_list[i];
+    }
+    return index_ptr();
 }

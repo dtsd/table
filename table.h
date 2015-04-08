@@ -52,13 +52,18 @@ public:
 
     io::hint_list_t get_hint_list() const { return hint_list; }
     page_index_t create_page_index();
+
+    void create_index(field_index_t, size_t);
+    void load_index_list();
+    index_ptr get_index(field_index_t) const;
+    field_index_t get_index_count() const { return index_list.size(); }
 private:
     /* data */
 
     //std::string file_name;
-    void create_index(field_index_t, size_t);
 
     io::hint_list_t hint_list;
+    std::vector<std::string> index_file_name_list;
     std::vector<index_ptr> index_list;
 public:
     page_index_t last_page_index, last_free_page_index;

@@ -16,6 +16,7 @@ index_t::index_t(const std::string &fn, size_t l, io::hint_t h)
 
 index_t::~index_t()
 {
+    dumps();
 }
 
 void index_t::init()
@@ -213,4 +214,16 @@ std::vector<addr_t> index_t::get(const std::string &value)
 
         return list;
     }
+}
+
+void index_t::loads()
+{
+    stream->seekg(0);
+    *stream >> *this;
+}
+
+void index_t::dumps()
+{
+    stream->seekp(0);
+    *stream << *this;
 }

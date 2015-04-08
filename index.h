@@ -31,6 +31,11 @@ public:
     enum field_t : uint8_t { value = 0, page, row, next, next_len };
 
     void init();
+    void loads();
+    void dumps();
+
+    std::string get_file_name() const { return file_name; }
+    size_t get_len() const { return len; }
 private:
     /* data */
     size_t len, row_end;
