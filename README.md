@@ -12,7 +12,8 @@
 * Внешнее хранилище данных для строк длиннее 8Кб (TOAST)
 
 Пример использования таблицы
-```
+
+```c++
 #include "table.h"
 
 int main(int argc, const char *argv[])
